@@ -8,8 +8,8 @@
 }
 RCT_EXPORT_MODULE(DialogProgress)
 
-RCT_REMAP_METHOD(show, show:(NSDictionary*)opts resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    
+RCT_EXPORT_METHOD(show:(NSDictionary*)opts callback:(RCTResponseSenderBlock)callback)
+{
     // Remove old alert if it's still visible
     BOOL animate = YES;
     if (self.visibleAlert) {
@@ -25,7 +25,9 @@ RCT_REMAP_METHOD(show, show:(NSDictionary*)opts resolver:(RCTPromiseResolveBlock
     // Add cancel button if cancelable
     NSNumber* cancelable = [opts valueForKey:@"isCancelable"];
     if (cancelable.boolValue) {
-        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction* action) {
+        NSString* cancelText = [opts valueForKey:@"cancelText"];
+        [alert addAction:[UIAlertAction actionWithTitle:cancelText style:UIAlertActionStyleCancel handler:^(UIAlertAction* action) {
+            callback(@[ @"canceled" ]);
             self.visibleAlert = nil;
         }]];
     }
@@ -37,18 +39,9 @@ RCT_REMAP_METHOD(show, show:(NSDictionary*)opts resolver:(RCTPromiseResolveBlock
     
     // Make it visible
     self.visibleAlert = alert;
-    if (vc) [vc presentViewController:alert animated:animate completion:^{
-        
-        // Done
-        resolve(@"OK");
-        
-    }];
-    
-    // Fail if no root view controller
-    if (!vc)
-        reject(@"no_viewcontroller", @"No UIViewController found.", nil);
-    
+    [vc presentViewController:alert animated:animate completion:^{}];
 }
+
 
 RCT_REMAP_METHOD(hide, hideWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
