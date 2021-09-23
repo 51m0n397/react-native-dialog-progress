@@ -24,13 +24,42 @@ RCT_EXPORT_METHOD(show:(NSDictionary*)opts callback:(RCTResponseSenderBlock)call
     
     // Add cancel button if cancelable
     NSNumber* cancelable = [opts valueForKey:@"isCancelable"];
+    int offset = 0;
     if (cancelable.boolValue) {
+        offset = -10;
         NSString* cancelText = [opts valueForKey:@"cancelText"];
         [alert addAction:[UIAlertAction actionWithTitle:cancelText style:UIAlertActionStyleCancel handler:^(UIAlertAction* action) {
             callback(@[ @"canceled" ]);
             self.visibleAlert = nil;
         }]];
     }
+    
+    // Create spinner
+    UIViewController *customVC = [[UIViewController alloc] init];
+    UIActivityIndicatorView* spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    spinner.color = [UIColor blackColor];
+    [spinner startAnimating];
+    [customVC.view addSubview:spinner];
+    
+    [customVC.view addConstraint:[NSLayoutConstraint
+                                  constraintWithItem: spinner
+                                  attribute:NSLayoutAttributeCenterX
+                                  relatedBy:NSLayoutRelationEqual
+                                  toItem:customVC.view
+                                  attribute:NSLayoutAttributeCenterX
+                                  multiplier:1.0f
+                                  constant:0.0f]];
+
+    [customVC.view addConstraint:[NSLayoutConstraint
+                                  constraintWithItem: spinner
+                                  attribute:NSLayoutAttributeCenterY
+                                  relatedBy:NSLayoutRelationEqual
+                                  toItem:customVC.view
+                                  attribute:NSLayoutAttributeCenterY
+                                  multiplier:1.0f
+                                  constant:offset]];
+    
+    [alert setValue:customVC forKey:@"contentViewController"];
 
     // Find parent view controller
     UIViewController* vc = [UIApplication sharedApplication].delegate.window.rootViewController;
