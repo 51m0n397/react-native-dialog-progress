@@ -70,9 +70,15 @@ protected List<ReactPackage> getPackages() {
     const options = {
         title:"Loading",
         message:"This is a message!",
-        isCancelable:true
+        isCancelable:true,
+        cancelText: "Cancel"
     }
-    DialogProgress.show(options)
+    
+    function cancelCallback() {
+        console.log("canceled");
+    }
+    
+    DialogProgress.show(options, cancelCallback)
 ```
 
 ![](https://raw.githubusercontent.com/cleandersonlobo/react-native-dialog-progress/master/example.gif)
@@ -83,6 +89,7 @@ protected List<ReactPackage> getPackages() {
 title | text for the dialog title | undefined | string
 message | text for the dialog message | undefined | string
 isCancelable | true if the dialog is cancelable, false otherwise | false | bool
+cancelText | Text for the cancel button | undefined | string
 
 ## Hide DialogProgress
 
