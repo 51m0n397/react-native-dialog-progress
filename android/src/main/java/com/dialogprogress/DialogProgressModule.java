@@ -3,12 +3,14 @@ package com.dialogprogress;
 import android.app.Activity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.Callback;
 
 public class DialogProgressModule extends ReactContextBaseJavaModule {
     private ProgressDialog progressDialog;
@@ -25,32 +27,27 @@ public class DialogProgressModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void show(ReadableMap map, final Promise promise){
+    public void show(ReadableMap map, final Callback callBack){
          if(map == null){
                 return;
           }
           Activity context = this.getCurrentActivity();
           String title = map.hasKey("title") ? map.getString("title") : null;
           String message = map.hasKey("message") ? map.getString("message") : null;
+          String cancelText = map.hasKey("cancelText") ? map.getString("cancelText") : null;
           boolean isCancelable = map.hasKey("isCancelable") ? map.getBoolean("isCancelable") : false;
-          if(this.progressDialog==null){
-              this.progressDialog = ProgressDialog.show(context, title, message, false, isCancelable);
-          }
-          if(!this.progressDialog.isShowing()){
-              this.progressDialog.show();
-              this.progressDialog.setTitle(title);
-              this.progressDialog.setMessage(message);
-              this.progressDialog.setCancelable(isCancelable);
-              promise.resolve("OK");
-          }else{
-              this.progressDialog.setTitle(title);
-              this.progressDialog.setTitle(title);
-              this.progressDialog.setMessage(message);
-              this.progressDialog.setCancelable(isCancelable);
-              promise.resolve("OK");
-          }
 
-
+          this.progressDialog = new ProgressDialog(context);
+          this.progressDialog.setTitle(title);
+          this.progressDialog.setMessage(message);
+          this.progressDialog.setCancelable(false);
+          this.progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancelText, new DialogInterface.OnClickListener() {
+               @Override
+               public void onClick(DialogInterface dialog, int which) {
+                    callBack.invoke("canceled");
+               }
+          });
+          this.progressDialog.show();
     }
 
     @ReactMethod
